@@ -1,6 +1,6 @@
 -- custom tween
 
-local Signal = loadfile("signal.lua")()
+local Signal = loadstring(request({ Url = 'https://raw.githubusercontent.com/dauntIess/dreya-ui/refs/heads/main/resources/signal.lua', Method = 'GET' }).Body)()
 
 local render = game:GetService("RunService").RenderStepped
 local sqrt, sin, pi, halfpi, doublepi = math.sqrt, math.sin, math.pi, math.pi / 2, math.pi * 2
