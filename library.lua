@@ -4664,32 +4664,32 @@ function library:new(cfg)
                     local float = cfg.float or 1;
                     local flag = cfg.flag or utility.nextflag();
                     local callback = cfg.callback or function() end;
-    
+
                     if cfg.ignoreflag then
                         table.insert(configignores, flag)
                     end
-    
+
                     local default
                     if range then
                         default = cfg.default or {min, max}
                     else
                         default = math.clamp(cfg.default or min, min, max)
                     end
-    
+
                     -- // Drawings
                     local holder = library:create("Square", {Parent = side, Visible = true, Transparency = 0, Size = name and UDim2.new(1,0,0,22) or UDim2.new(1,0,0,12), Thickness = 1, Filled = true, ZIndex = 14});
-    
+
                     if name then
                         local slider_title = library:create("Text", {Text = name, Parent = holder, Visible = true, Transparency = 1, Theme = "Text", Size = 13, Center = false, Outline = false, Font = Drawing.Fonts.Plex, Position = UDim2.new(0,20,0,-2), ZIndex = 14})
                     end
                     local slider_frame = library:create("Square", {Parent = holder, Visible = true, Transparency = 1, Theme = "Toggle Background", Size = UDim2.new(1,-50,0,6), Thickness = 1, Filled = true, ZIndex = 14, Position = name and UDim2.new(0,23,0,14) or UDim2.new(0,23,0,3)});
                     local outline = library:outline(slider_frame, Color3.fromRGB(0,0,0), 14);
                     library:create("Image", {Data = images.gradient, Transparency = 1, Visible = true, Parent = slider_frame, Size = UDim2.new(1,0,1,0), ZIndex = 15});
-    
+
                     if not range then
                         local slider_fill = library:create("Square", {Parent = slider_frame, Visible = true, Transparency = 1, Theme = "Accent", Size = UDim2.new(1,0,1,0), Thickness = 1, Filled = true, ZIndex = 14, Position = UDim2.new(0,0,0,0)});
                         local slider_value = library:create("Text", {Text = text, Parent = slider_fill, Visible = true, Transparency = 1, Theme = "Text", Size = 13, Center = true, Outline = true, Font = Drawing.Fonts.Plex, Position = UDim2.new(1,0,0.5,-2), ZIndex = 15});
-    
+
                         local function set(value)
                             value = math.clamp(utility.round(value, float), min, max)
                             slider_value.Text = text:gsub("%[value%]", string.format("%.14g", value))
@@ -4700,34 +4700,34 @@ function library:new(cfg)
                         end
                         flags[flag] = set
                         set(default)
-    
+
                         local sliding = false
                         local function slide(input)
                             local sizeX = (input.Position.X - slider_frame.AbsolutePosition.X) / slider_frame.AbsoluteSize.X
                             local value = ((max - min) * sizeX) + min
                             set(value)
                         end
-    
+
                         holder.MouseEnter:Connect(function()
                             library:change_object_theme(slider_frame, "Toggle Background Highlight")
                         end)
                         holder.MouseLeave:Connect(function()
                             library:change_object_theme(slider_frame, "Toggle Background")
                         end)
-    
+
                         library:connect(slider_frame.InputBegan, function(input)
                             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                                 sliding = true
                                 slide(input)
                             end
                         end)
-    
+
                         library:connect(slider_frame.InputEnded, function(input)
                             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                                 sliding = false
                             end
                         end)
-    
+
                         library:connect(services.InputService.InputChanged, function(input)
                             if input.UserInputType == Enum.UserInputType.MouseMovement then
                                 if sliding then
@@ -4740,85 +4740,85 @@ function library:new(cfg)
                         local slider_fill = library:create("Square", {Parent = slider_frame, Visible = true, Transparency = 1, Theme = "Accent", Size = UDim2.new(1,0,1,0), Thickness = 1, Filled = true, ZIndex = 14, Position = UDim2.new(0,0,0,0)});
                         local min_handle = library:create("Square", {Parent = slider_frame, Visible = true, Transparency = 0, Size = UDim2.new(0,12,0,12), Filled = true, ZIndex = 14, Position = UDim2.new(0,-6,0,0)})
                         local max_handle = library:create("Square", {Parent = slider_frame, Visible = true, Transparency = 0, Size = UDim2.new(0,12,0,12), Filled = true, ZIndex = 14, Position = UDim2.new(1,-6,0,0)})
-    
+
                         local min_value_text = library:create("Text", {Text = tostring(range[1]) .. suffix, Parent = min_handle, Visible = true, Transparency = 1, Theme = "Text", Size = 13, Center = true, Outline = true, Font = Drawing.Fonts.Plex, Position = UDim2.new(0.5, 0, 0.5, 0), ZIndex = 15});
                         local max_value_text = library:create("Text", {Text = tostring(range[2]) .. suffix, Parent = max_handle, Visible = true, Transparency = 1, Theme = "Text", Size = 13, Center = true, Outline = true, Font = Drawing.Fonts.Plex, Position = UDim2.new(0.5, 0, 0.5, 0), ZIndex = 15});
-    
+
                         local function set(values)
                             local minValue = values[1] or range[1]
                             local maxValue = values[2] or range[2]
-    
+
                             if maxValue < minValue then
                                 maxValue = minValue
                             end
-    
+
                             minValue = math.clamp(utility.round(minValue, float), min, max)
                             maxValue = math.clamp(utility.round(maxValue, float), min, max)
-    
+
                             local sizeMinX = ((minValue - min) / (max - min))
                             local sizeMaxX = ((maxValue - min) / (max - min))
-    
+
                             tween.new(slider_fill, TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                                 Size = UDim2.new(sizeMaxX - sizeMinX, 0, 1, 0),
                                 Position = UDim2.new(sizeMinX, 0, 0, 0)
                             }):Play()
-    
+
                             tween.new(min_handle, TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Position = UDim2.new(sizeMinX, -6, 0, 0) }):Play()
                             tween.new(max_handle, TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Position = UDim2.new(sizeMaxX, -6, 0, 0) }):Play()
-    
+
                             min_value_text.Text = tostring(minValue) .. suffix
                             max_value_text.Text = tostring(maxValue) .. suffix
-    
+
                             range = {minValue, maxValue}
                             library.flags[flag] = range
                             callback(range)
                         end
-    
+
                         flags[flag] = set
                         library.flags[flag] = range
                         set(range)
-    
+
                         local slidingMin = false
                         local slidingMax = false
-    
+
                         local function slideMin(input)
                             local sizeX = (input.Position.X - slider_frame.AbsolutePosition.X) / slider_frame.AbsoluteSize.X
                             local minValue = ((max - min) * sizeX) + min
                             set({minValue, range[2]})
                         end
-    
+
                         local function slideMax(input)
                             local sizeX = (input.Position.X - slider_frame.AbsolutePosition.X) / slider_frame.AbsoluteSize.X
                             local maxValue = ((max - min) * sizeX) + min
                             set({range[1], maxValue})
                         end
-    
+
                         library:connect(min_handle.InputBegan, function(input)
                             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                                 slidingMin = true
                                 slideMin(input)
                             end
                         end)
-    
+
                         library:connect(min_handle.InputEnded, function(input)
                             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                                 slidingMin = false
                             end
                         end)
-    
+
                         library:connect(max_handle.InputBegan, function(input)
                             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                                 slidingMax = true
                                 slideMax(input)
                             end
                         end)
-    
+
                         library:connect(max_handle.InputEnded, function(input)
                             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                                 slidingMax = false
                             end
                         end)
-    
+
                         library:connect(services.InputService.InputChanged, function(input)
                             if input.UserInputType == Enum.UserInputType.MouseMovement then
                                 if slidingMin then
@@ -4829,7 +4829,7 @@ function library:new(cfg)
                             end
                         end)
                     end
-    
+
                     if allow then
                         local slider_question = library:create("Text", {Text = "?", Parent = holder, Visible = true, Transparency = 1, Theme = "Text", Size = 13, Center = false, Outline = false, Font = Drawing.Fonts.Plex, Position = UDim2.new(1,-36,0,-2), ZIndex = 14});
                         local question_button = library:create("Square", {
@@ -4843,7 +4843,7 @@ function library:new(cfg)
                             Transparency = 0,
                             ZIndex = 29,
                         })
-    
+
                         local slider_window = library:create("Square", {
                             Filled = true,
                             Thickness = 0,
@@ -4855,10 +4855,10 @@ function library:new(cfg)
                             ZIndex = 29,
                         })
                         table.insert(fadethings, slider_window)
-    
+
                         local outline3 = library:outline(slider_window, Color3.fromRGB(44,44,44))
                         library:outline(outline3, Color3.fromRGB(0,0,0))
-    
+
                         local windowback = library:create("Square", {
                             Filled = true,
                             Thickness = 0,
@@ -4869,7 +4869,7 @@ function library:new(cfg)
                             Position = UDim2.new(0, 1, 0, 1),
                             ZIndex = 29,
                         })
-    
+
                         local window_page = library:create("Square", {
                             Filled = false,
                             Thickness = 0,
@@ -4882,7 +4882,7 @@ function library:new(cfg)
                             ZIndex = 29
                         })
                         window_page:AddListLayout(3)
-    
+
                         local slider_button = library:create("Square", {
                             Filled = true,
                             Thickness = 0,
@@ -4893,24 +4893,24 @@ function library:new(cfg)
                             Visible = true,
                             ZIndex = 29,
                         })
-    
+
                         local isfading = false;
-    
+
                         local fadetext = library:create("Text", {Text = "fading", Parent = slider_button, Visible = true, Transparency = 1, Theme = "Text", Size = 13, Center = true, Outline = false, Font = Drawing.Fonts.Plex, Position = UDim2.new(0.5, 0, 0, 1), ZIndex = 29});
-    
+
                         local outline3 = library:outline(slider_window, Color3.fromRGB(44,44,44))
                         library:outline(outline3, Color3.fromRGB(0,0,0))
-    
+
                         local startslide = library.createslider({parent = window_page, name = "start", flag = library.flags[flag .. "_FADING_START"], min = fade_min, max = fade_max, default = 0, callback = function(state) library.flags[flag .. "_FADING_START"] = state end})
-    
+
                         local endslide = library.createslider({parent = window_page, name = "end", flag = library.flags[flag .. "_FADING_END"], min = fade_min, max = fade_max, default = 0, callback = function(state) library.flags[flag .. "_FADING_END"] = state end})
-    
+
                         local speedslide = library.createslider({parent = window_page, name = "speed", flag = library.flags[flag .. "_FADING_SPEED"], min = 0, max = 500, default = 100, callback = function(state) library.flags[flag .. "_FADING_SPEED"] = state end});
-    
+
                         local function setfade(state)
                             library.flags[flag.."_FADING"] = state
                         end
-    
+
                         question_button.MouseButton1Click:Connect(function()
                             for i,v in next, fadethings do
                                 if v ~= slider_window then
@@ -4935,7 +4935,7 @@ function library:new(cfg)
                                 local val = nil
                                 if library.flags[flag .. "_FADING"] then
                                     local sinwave = math.abs(math.sin(os.clock() * (library.flags[flag .. "_FADING_SPEED"] / 50)))
-    
+
                                     val = utility.NumberLerp(sinwave, {
                                         [1] = {
                                             start = 0,
@@ -4954,15 +4954,15 @@ function library:new(cfg)
                         end)
                         flags[flag .. "_FADING"] = setfade
                     end
-    
+
                     function slider:set(value)
                         set(value)
                     end
-    
+
                     if size == "auto" then
                         side.Size = UDim2.new(1,0,0,section_content.AbsoluteContentSize + 55);
                     end;
-    
+
                     return slider;
                 end;
                 --
@@ -6673,27 +6673,18 @@ function library:notify(info)
 
     library.notiflist.reposition()
 end;
-
 function library:createwatermark()
-    local title = 'watermark'
-    title = utility.findtriggers(title)
 
-    local watermark = { objects = {}, tickrate = 25 }
+    local watermark = { title = 'watermark', objects = {}, tickrate = 25 }
+    local watermark_init = tick()
 
-    watermark.objects.background = library:create('Square', {
-        Size = UDim2.new(0, utility.textlength(title, 2, 13).X + 5, 0, 19),
-        Position = UDim2.new(0, 18, 0, 75),
-        Color = Color3.fromRGB(13, 13, 13),
-        ZIndex = 1,
-        Thickness = 1,
-        Filled = true
-    }, true)
+    watermark.objects.background = library:create('Square', { Size = UDim2.new(0, utility.textlength(watermark.title, 2, 13).X + 5, 0, 19), Position = UDim2.new(0, 18, 0, 75), Color = Color3.fromRGB(13, 13, 13), ZIndex = 1, Thickness = 1, Filled = true }, true)
 
     watermark.objects.outline1 = library:outline(watermark.objects.background, Color3.fromRGB(44, 44, 44), 10, true)
     watermark.objects.outline2 = library:outline(watermark.objects.outline1, Color3.fromRGB(0, 0, 0), 10, true)
 
     watermark.objects.text2 = library:create("Text", { Parent = watermark.objects.background, Visible = true, Transparency = 1, Theme = "Accent", Size = 13, Text = 'dreya', Center = false, Outline = false, Font = Drawing.Fonts.Plex, Position = UDim2.new(0, 3, 0, 2), ZIndex = 11 })
-    watermark.objects.text3 = library:create("Text", { Text = title, Parent = watermark.objects.background, Visible = true, Transparency = 1, Theme = "Text", Size = 13, Center = false, Outline = false, Font = Drawing.Fonts.Plex, Position = UDim2.new(0, utility.textlength(watermark.objects.text2.Text, 2, 13).X + 5, 0, 2), ZIndex = 11 })
+    watermark.objects.text3 = library:create("Text", { Text = watermark.title, Parent = watermark.objects.background, Visible = true, Transparency = 1, Theme = "Text", Size = 13, Center = false, Outline = false, Font = Drawing.Fonts.Plex, Position = UDim2.new(0, utility.textlength(watermark.objects.text2.Text, 2, 13).X + 5, 0, 2), ZIndex = 11 })
 
     watermark.objects.line1 = library:create("Square", { Parent = watermark.objects.background, Visible = true, Transparency = 1, Theme = "Accent", Size = UDim2.new(0, 20, 0, 1), Position = UDim2.new(0, 0, 1, -1), Thickness = 1, Filled = true, ZIndex = 11 })
 
@@ -6710,22 +6701,22 @@ function library:createwatermark()
         end
     end
 
-    function watermark.settext(text)
-        title = string.lower(utility.findtriggers(text))
-        watermark.update()
-    end
+    game:GetService("RunService").Heartbeat:Connect(function()
+        if (tick() - watermark_init) * 1000 > watermark.tickrate then
+            watermark_init = tick()
+            if watermark.objects.background.Visible then
+                local title = string.lower(utility.findtriggers(watermark.title))
+                local newSize = UDim2.new(0, utility.textlength(title, 2, 13).X + utility.textlength('dreya', 2, 13).X + 10, 0, 19)
 
-    function watermark.update()
-        if watermark.objects.background.Visible then
-            local newSize = UDim2.new(0, utility.textlength(title, 2, 13).X + utility.textlength('dreya', 2, 13).X + 10, 0, 19)
-
-            watermark.objects.background.Size = newSize
-            watermark.objects.text3.Text = title
-            watermark.objects.text3.Position = UDim2.new(0, utility.textlength(watermark.objects.text2.Text, 2, 13).X + 5, 0, 2)
+                watermark.objects.background.Size = newSize
+                watermark.objects.text3.Text = title
+                watermark.objects.text3.Position = UDim2.new(0, utility.textlength(watermark.objects.text2.Text, 2, 13).X + 5, 0, 2)
+            end
         end
-    end
+    end)
 
     watermark.setstate(false)
+
     return watermark
 end
 
