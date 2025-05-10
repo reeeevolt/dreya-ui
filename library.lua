@@ -1,7 +1,6 @@
 local startUpArgs = getgenv().startUpArgs or { 'universal', 'public' }
 -- [[
     --obleus remake
-    --go fuck yourself portal
 --]]
 
 local drawing  = loadstring(request({ Url = 'https://raw.githubusercontent.com/dauntIess/dreya-ui/refs/heads/main/resources/drawing.lua', Method = 'GET' }).Body)()
