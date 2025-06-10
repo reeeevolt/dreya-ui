@@ -97,38 +97,38 @@ local window = library:new({ name = 'dreya', sub = `.{startUpArgs[1]}`, size = V
                 end
                 configlist:refresh(tbl);
                 library:notify({ title = 'file service', text = 'all available configs have been refreshed', time = 5 })
-            end;
+            end
             --
             main:button({ name = 'load', confirm = true, callback = function()
                 if library.flags['selected config'] ~= nil and isfile(folders['configs'] .. '/'..library.flags['selected config']..'.dreya') then
                     library:load_config(folders['configs'] .. '/'..library.flags['selected config']..'.dreya');
                     library:notify({ title = 'file service', text = string.format('successfully loaded \'%s\'', library.flags['selected config']), time = 7 })
-                end;
+                end
             end})
             main:button({ name = 'save', confirm = true, callback = function()
                 local file = library.flags['selected config']
                 if file ~= nil and isfile(string.format(folders['configs'] .. '/%s.dreya', file)) then
-                    writefile(string.format(folders['configs'] .. '/%s.dreya', file), window:get_config());
+                    writefile(string.format(folders['configs'] .. '/%s.dreya', file), library:get_config());
                     library:notify({ title = 'file service', text = string.format('successfully saved \'%s\'', file), time = 7 })
-                end;
+                end
             end}):button({ name = 'delete', confirm = true, callback = function()
                 if library.flags['selected config'] ~= nil and isfile(folders['configs'] .. '/'..library.flags['selected config']..'.dreya') then
                     local file = library.flags['selected config']
                     delfile(folders['configs'] .. '/'..file..'.dreya');
                     library:notify({ title = 'file service', text = string.format('successfully deleted \'%s\'', file), time = 7 })
                     update_configs();
-                end;
+                end
             end})
             main:textbox({ placeholder = 'file name', flag = 'config name', default = '', ignoreflag = true, middle = true})
             main:button({ name = 'create', confirm = true, callback = function()
                 local name = library.flags['config name']
                 if library.flags['config name'] == '' then
-                    return library:notify({ title = 'file service', text = string.format('error creating file, name can\'t be blank', name), time = 7 })
-                end;
-                if isfile(string.format(folders['configs'] .. '/%s.dreya', name)) then
-                    return library:notify({ title = 'file service', text = string.format('error creating file \'%s.dreya\', file already exists', name), time = 7 })
+                    return library:notify({ title = 'file service', text = string.format('failed (name can\'t be blank)', name), time = 7 })
                 end
-                writefile(string.format(folders['configs'] .. '/%s.dreya', name), window:get_config());
+                if isfile(string.format(folders['configs'] .. '/%s.dreya', name)) then
+                    return library:notify({ title = 'file service', text = string.format('failed (\'%s.dreya\' already exists)', name), time = 7 })
+                end
+                writefile(string.format(folders['configs'] .. '/%s.dreya', name), library:get_config());
                 update_configs();
                 library:notify({ title = 'file service', text = string.format('successfully created file \'%s.dreya\'', name), time = 7 })
             end })
@@ -143,11 +143,11 @@ local window = library:new({ name = 'dreya', sub = `.{startUpArgs[1]}`, size = V
                         scriptlist:refresh(tbl)
                         scriptlist:set(tbl[1])
                         library:notify({ title = 'file service', text = 'all available scripts have been refreshed', time = 5 })
-                    end;
+                    end
                     local function load_script()
                         local file = library.flags['selected script']
                         if table.find(dreya.loaded_scripts, file) then
-                            return library:notify({ title = 'file service', text = ('error loading script (\'%s\' has been executed previously.)'):format(file), time = 5 })
+                            return library:notify({ title = 'file service', text = ('failed (\'%s\' has been executed previously.)'):format(file), time = 5 })
                         end
 
                         library:notify({ title = 'file service', text = ('attempting to load script \'%s\''):format(file), time = 10 })
@@ -162,32 +162,42 @@ local window = library:new({ name = 'dreya', sub = `.{startUpArgs[1]}`, size = V
                 end
             end
         end
+        local options = options_tab:section({ name = 'data', side = 'right', size = '275' }) do
+
+            if userdata then
+                local pfp = request({
+                    Url = `https://cdn.discordapp.com/avatars/{userdata.discord_info.id}/{userdata.discord_info.avatar}.png`,
+                    Method = 'GET'
+                }).Body
+
+                local infographic = options:infographic({
+                    info = `uid {userdata.UID} ({userdata.discord_info.username})\nexpires in: 9y, 9m`,
+                    image = pfp })
+                options:toggle({ name = 'hide', flag = 'hide userinfo', callback = function(bool)
+                    infographic:hide(bool)
+                end})
+            end
+            options:toggle({ name = 'watermark', flag = 'watermark', callback = function(state)
+                watermark.setstate(state)
+            end })
+            options:multibox({ flag = 'watermark text', options = { '{fps}', '{fpsavg}', '{ping}', '{date}', '{time}', '{uid}', '{build}', '{game}', '{memory}', '{netreceived}', '{netoutgoing}' }, default = { '{build}', '{fpsavg}'}, max = 5, callback = function(tbl)
+                watermark.title = table.concat(tbl, ', ')
+            end})
+            options:slider({ name = 'refresh rate', flag = 'watermark refresh rate', min = 10, max = 1000, suffix = 'ms', float = 1, default = 250, callback = function(v)
+                watermark.refreshrate = v
+            end})
+        end
         local options = options_tab:section({ name = 'options', side = 'right', size = '275' }) do
-            local watermark_init = tick()
             options:divider({ name = 'menu options' }) do
                 options:keybind({ name = 'menu', flag = 'menu toggle', default = Enum.KeyCode.Minus, mode = 'Toggle', callback = function() library:set_open(not library.open) end})
                 options:keybind({ name = 'player list', flag = 'player list toggle', default = Enum.KeyCode.LeftBracket, mode = 'Toggle', callback = function(state) playerlist:setopen(not playerlist.open) end})
                 options:keybind({ name = 'server list', flag = 'server list toggle', default = Enum.KeyCode.LeftBracket, mode = 'Toggle', callback = function(state) serverlist:setopen(not serverlist.open) end })
-                options:toggle({ name = 'watermark', flag = 'watermark', callback = function(state)
-                    watermark.setstate(state)
-                end })
-                options:multibox({ flag = 'watermark text', options = { '{fps}', '{fpsavg}', '{ping}', '{date}', '{time}', '{uid}', '{build}', '{game}', '{memory}', '{netreceived}', '{netoutgoing}' }, default = { '{build}', '{fpsavg}'}, max = 5, callback = function(tbl) watermark.settext(table.concat(tbl, ' | ')) end})
-                options:slider({ name = 'refresh rate', flag = 'watermark refresh rate', min = 10, max = 500, suffix = 'ms', float = 1, default = 250 })
-
             end
             options:divider({ name = 'personalization' }) do
                 options:colorpicker({ name = 'accent', flag = 'menu accent', default = Color3.fromRGB(117, 163, 125), callback = function(s) library:change_theme_color('Accent', s) end})
             end
-            task.spawn(function()
-                while task.wait() do
-                    if(tick() - watermark_init) * 1000 > library.flags['watermark refresh rate'] then
-                        watermark_init = tick()
-                        watermark.settext(table.concat(library.flags['watermark text'], ', '))
-                        watermark.update()
-                    end
-                end
-            end)
         end
+
     end
 end
 
